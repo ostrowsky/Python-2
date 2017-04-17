@@ -1,0 +1,1 @@
+Zeichenfolge in eine Binärdatei codiert latin-1 zu schreiben
