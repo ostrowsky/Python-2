@@ -1,6 +1,6 @@
 from User import User
 from Message import Mess
-
+from Chat import Chat
 '''
 В данной версии реализуется базовый функционал приложения Messenger
 (без реализации сетевого взаимодействия)
@@ -21,14 +21,23 @@ Alice.getContacts()
 Bob.addContact(Ted)
 Bob.getContacts()
 
-Alice.send_message(Bob, "Привет! Добавь меня в свой список контактов")
+chat1 = Chat(Alice)
+chat1.add_participants(Bob)
+chat1.addMessage(Alice, "Привет! Добавь меня в свой список контактов")
 Ted.addContact(Bob)
-Ted.send_message(Bob, "Привет! Я Ted. Помнишь меня?")
-Bob.send_message(Ted, "Привет! Давно не виделись!")
+chat2 = Chat(Ted)
+chat2.add_participants(Bob)
+chat2.addMessage(Ted,"Привет! Я Ted. Помнишь меня?")
+chat2.addMessage(Bob, "Привет! Давно не виделись!")
 Bob.addContact(Alice)
 Bob.getContacts()
-Bob.send_message(Alice, "Ты кто?")
-Alice.send_message(Bob, "Я Alice")
-Bob.send_message(Alice, "Привет, Alice. Добавил тебя")
-Ted.send_message(Bob, "Как дела?")
-Ted.getChat(Alice)
+chat1.addMessage(Bob,"Ты кто?")
+chat1.addMessage(Alice,"Я Alice")
+chat1.addMessage(Bob,"Привет, Alice. Добавил тебя")
+chat2.addMessage(Ted,"Как дела?")
+chat1.printChat()
+chat2.printChat()
+#Bob.getChat(Ted)
+#for chat in Chat.chats: print(chat.owner.name, [participant.name for participant in chat.participants], [message.text for message in chat.messages])
+
+

@@ -1,5 +1,6 @@
 import hashlib
 from Message import Mess
+from Chat import Chat
 
 
 class User:
@@ -57,13 +58,11 @@ class User:
     def connect(self):
         User.user_statuses[self.id] = User.status_list[1]
 
+    def startChat(self):
+        pass
 
-
-    def send_message(self, contact, text):
-        if contact in self.contacts:
-            message = Mess(self, contact, text)
-        else:
-            print("Пользователь {} не найден в списке контактов пользователя {}".format(contact.name, self.name))
+    def getChat(self):
+        pass
 
 
     def receive_message(self, message):
@@ -72,7 +71,7 @@ class User:
 
     def __str__(self):
         return "Пользователь с ID: {0}, имя: {1}".format(self.id, self.name)
-
+'''
     def getChat(self, contact):
         print("--------------------Чат с {}-----------------------------".format(contact.name))
         chat_with = []
@@ -105,7 +104,7 @@ class User:
 
 
 
-'''
+
         mess_dict = {}
         for message in Mess.messages:
             if not message.sender == self:
