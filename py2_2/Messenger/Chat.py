@@ -24,7 +24,7 @@ class Chat:
             print("Пользователь {} не является участником чата".format(sender.name))
 
     def printChat(self):
-        print("--------------------Чат с {}-----------------------------".format([x.name for x in self.participants]))
+        print("--------------------Чат {} с {}-----------------------------".format(self.owner.name, [x.name for x in self.participants]))
         for message in self.messages:
             if message.sender == self.owner:
                 print(self.owner.name, str(message.time)[:-7])
