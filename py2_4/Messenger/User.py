@@ -85,17 +85,8 @@ class User:
     def startChat(self, *participants):
         new_chat = Chat(self)
         new_chat.add_participants(*participants)
-        if new_chat.add_participants(*participants):
-            all_participants = [x for x in participants]
-            all_participants.append(self)
-            while True:
-                new_chat.printChat()
-                curr_participant = 0
-                curr_participant = int(input("Введите номер участника: {} для {}\n".format([x for x in range(len(all_participants))],[x.name for x in all_participants])))
-                new_message = input("Введите сообщение от имени {} или X для выхода из чата\n".format(all_participants[curr_participant].name))
-                if new_message != 'X':
-                    new_chat.addMessage(all_participants[curr_participant], new_message)
-                else: break
+        if new_chat.participants:
+            new_chat.printChat()
         else:
             print("Участники не добавлены")
 

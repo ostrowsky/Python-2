@@ -27,14 +27,13 @@ conn.commit()
 Alice = User('Alice', '1111111')
 Bob = User('Bob', '2222222')
 Ted = User('Ted', '3333333')
-print(Alice)
-print(Bob)
-
+Fred = User('Fred', '4444444')
 Alice.addContact(Bob)
 Alice.addContact(Ted)
+Alice.addContact(Fred)
 Alice.getContacts()
 Bob.addContact(Ted)
 Bob.getContacts()
-Bob.startChat(Ted)
+Alice.startChat(Bob, Ted, Fred)
 
 

@@ -10,15 +10,12 @@ class Mess:
         else:
             self.id = 1
         self.sender = sender
-        #self.recipient = recipient
         self.text = str(text)
         self.time = datetime.now()
         Mess.messages.append(self)
-        #self.recipient.receive_message(self)
         conn_string = "host='localhost' dbname='postgres' user='postgres' password='4309344'"
         conn = psycopg2.connect(conn_string)
         cur = conn.cursor()
-        print(self.id, self.sender.id, self.time, self.text, chat)
         cur.execute("""
                                                         insert into messenger.message
                                                         (messageid, sender, time, text, chatid)
