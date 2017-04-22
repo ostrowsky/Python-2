@@ -2,7 +2,7 @@ from datetime import datetime
 import psycopg2
 
 class Mess:
-    messages = []
+    #messages = []
 
     def __init__(self, sender, text, chat):
         if Mess.messages:
@@ -12,7 +12,7 @@ class Mess:
         self.sender = sender
         self.text = str(text)
         self.time = datetime.now()
-        Mess.messages.append(self)
+        #Mess.messages.append(self)
         conn_string = "host='localhost' dbname='postgres' user='postgres' password='4309344'"
         conn = psycopg2.connect(conn_string)
         cur = conn.cursor()

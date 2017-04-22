@@ -3,6 +3,7 @@ import psycopg2
 
 class Chat:
     chats = []
+    conn_string = "host='localhost' dbname='postgres' user='postgres' password='4309344'"
     def __init__(self, owner):
 
         self.owner = owner
@@ -24,8 +25,7 @@ class Chat:
         for participant in participants:
             if participant in self.owner.contacts:
                 self.participants.append(participant)
-                conn_string = "host='localhost' dbname='postgres' user='postgres' password='4309344'"
-                conn = psycopg2.connect(conn_string)
+                conn = psycopg2.connect(Chat.conn_string)
                 cur = conn.cursor()
                 cur.execute("""
                                                                 insert into messenger.chat_participants
@@ -54,7 +54,12 @@ class Chat:
         print("--------------------Чат с {}-----------------------------".format([x.name for x in self.participants]))
 
         while True:
-            for message in self.messages:
+            conn = psycopg2.connect(Chat.conn_string)
+            cur = conn.cursor()
+            cur.execute("""select * from messenger.messages where chatid = %s);""",(self.id,))
+            messages = cur.fetchall()
+            conn.commit()
+            for message in messages:
                 if message.sender == self.owner:
                     print(self.owner.name, str(message.time)[:-7])
                     print("{0:<}".format(message.text))
