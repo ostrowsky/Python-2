@@ -1,5 +1,6 @@
 from Message import Mess
 import psycopg2
+from datetime import datetime
 
 class Chat:
     chats = []
@@ -10,15 +11,20 @@ class Chat:
         self.participants = [self.owner]
         self.messages = []
         Chat.chats.append(self)
-        self.id = len(Chat.chats)
+        self.created_at = datetime.now()
         conn_string = "host='localhost' dbname='postgres' user='postgres' password='4309344'"
         conn = psycopg2.connect(conn_string)
         cur = conn.cursor()
         cur.execute("""
                                 insert into messenger.chat
-                                (chatid, owner)
+                                (owner, createdat)
                                 values (%s, %s);""",
-                    (self.id, self.owner.id))
+                    (self.owner.id, self.created_at))
+        cur.execute("""
+                                        select chatid, MAX(createdat) from messenger.chat
+                                        GROUP BY chatid;""")
+
+        self.id = cur.fetchone()[0]
         conn.commit()
 
     def add_participants(self, *participants):
@@ -29,7 +35,7 @@ class Chat:
                 cur = conn.cursor()
                 cur.execute("""
                                                                 insert into messenger.chat_participants
-                                                                (chat_id, participant)
+                                                                (chatid, participant)
                                                                 values (%s, %s);""",
                             (self.id, participant.id))
                 conn.commit()
@@ -54,19 +60,6 @@ class Chat:
         print("--------------------Чат с {}-----------------------------".format([x.name for x in self.participants]))
 
         while True:
-            conn = psycopg2.connect(Chat.conn_string)
-            cur = conn.cursor()
-            cur.execute("""select * from messenger.messages where chatid = %s);""",(self.id,))
-            messages = cur.fetchall()
-            conn.commit()
-            for message in messages:
-                if message.sender == self.owner:
-                    print(self.owner.name, str(message.time)[:-7])
-                    print("{0:<}".format(message.text))
-                else:
-                    concat_str = str(message.time)[:-7] + ' ' + message.sender.name
-                    print("{0:>50}".format(concat_str))
-                    print("{0:>50}".format(message.text))
             curr_participant = int(input(
                 "Введите номер участника: {} для {}\n".format([x for x in range(len(self.participants))],
                                                               [x.name for x in self.participants])))
@@ -76,6 +69,24 @@ class Chat:
                 self.addMessage(self.participants[curr_participant], new_message)
             else:
                 break
+            conn = psycopg2.connect(Chat.conn_string)
+            cur = conn.cursor()
+            cur.execute("""select m.*, u.name from messenger.message m join messenger.user u on m.sender=u.userid where chatid=%s order by time;""",(self.id,))
+            messages = cur.fetchall()
+            conn.commit()
+            for message in messages:
+                sender = message[1]
+                time = message[2]
+                text = message[3]
+                name = message[-1]
+                if sender == self.owner.id:
+                    print(self.owner.name, str(time)[:-7])
+                    print("{0:<}".format(text))
+                else:
+                    concat_str = str(time)[:-7] + ' ' + name
+                    print("{0:>50}".format(concat_str))
+                    print("{0:>50}".format(text))
+
 
 
 
