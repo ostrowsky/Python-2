@@ -24,4 +24,4 @@ class Mess:
                      ))
         conn.commit()
     def __str__(self):
-        return "to: {0} at: {1} from: {2} received text:  {3}".format(self.recipient, self.time, self.sender.name, self.text)
+        return "at: {0} from: {1} received text:  {2}".format(self.time, self.sender.name, self.text)

@@ -69,13 +69,20 @@ class User:
 
     def getContacts(self):
         if self.contacts:
-            print("Список контактов пользователя {}: ".format(self.name))
-            i = 1
-            for contact in self.contacts:
-                print("     №{} {}".format(i, contact))
-                i+=1
+            conn_string = "host='localhost' dbname='postgres' user='postgres' password='4309344'"
+            conn = psycopg2.connect(conn_string)
+            cur = conn.cursor()
+            cur.execute("""
+                                            select name, c.contact from messenger.contacts c
+                                            join messenger.user u on c.contact=u.userid
+                                            where c.userid=%s;""",
+                        (self.id,))
+
+            contacts = cur.fetchall()
+            conn.commit()
+            return contacts
         else:
-            print("Список контактов пользователя {} пуст".format(self.name))
+            return "Список контактов пользователя {} пуст".format(self.name)
 
 
     def delFromContacts(self, contact):
@@ -88,12 +95,13 @@ class User:
     def startChat(self, *participants):
         new_chat = Chat(self)
         new_chat.add_participants(*participants)
+        '''
         if new_chat.participants:
             new_chat.printChat()
         else:
             print("Участники не добавлены")
-
-
+        '''
+        return new_chat.id
 
 
 
@@ -104,53 +112,3 @@ class User:
 
     def __str__(self):
         return "Пользователь с ID: {0}, имя: {1}".format(self.id, self.name)
-'''
-    def getChat(self, contact):
-        print("--------------------Чат с {}-----------------------------".format(contact.name))
-        chat_with = []
-        for message in Mess.messages:
-            if message.recipient == self and message.sender not in chat_with:
-                chat_with.append(message.sender)
-            if message.sender == self and message.recipient not in chat_with:
-                chat_with.append(message.recipient)
-
-
-        for user in chat_with:
-            if user == contact:
-                for message in Mess.messages:
-                    if message.recipient == user or message.sender == user:
-                        if message.sender == self:
-                            print(self.name, str(message.time)[:-7])
-                            print("{0:<}".format(message.text))
-                        if message.recipient == self:
-                            concat_str = str(message.time)[:-7] + ' ' + message.sender.name
-                            print("{0:>50}".format(concat_str))
-                            print("{0:>50}".format(message.text))
-            else:
-                print("Чат с такими участниками не найден")
-                print('\n')
-
-
-
-
-
-
-
-
-
-        mess_dict = {}
-        for message in Mess.messages:
-            if not message.sender == self:
-                mess_dict[message.sender] =  message
-
-        print(mess_dict)
-        for key, value in mess_dict.items():
-            print("--------------------Чат с {}-----------------------------".format(key.name))
-            if value.sender == self:
-                print(self.name, str(message.time)[:-7])
-                print("{0:<}".format(message.text))
-            if value.recipient == self:
-                concat_str = str(message.time)[:-7] + ' ' + message.sender.name
-                print("{0:>50}".format(concat_str))
-                print("{0:>50}".format(message.text))
-'''

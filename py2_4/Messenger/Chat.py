@@ -51,7 +51,7 @@ class Chat:
         if sender in self.participants or sender == self.owner:
             message = Mess(sender, text, self.id)
             self.messages.append(message)
-            return True
+            return message
         else:
             print("Пользователь {} не является участником чата".format(sender.name))
 

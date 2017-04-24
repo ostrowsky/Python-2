@@ -2,6 +2,8 @@ from User import User
 from Message import Mess
 from Chat import Chat
 import psycopg2
+from tkinter import *
+
 
 '''
 В данной версии реализуется базовый функционал приложения Messenger
@@ -11,6 +13,8 @@ import psycopg2
 отправке сообщений и отображения их истории
 
 20.04.17 - Добавлено взаимодействие с СУБД PostgreSQL
+
+24.04.17 - Добавлен функционал создания чата, отправки и отображения истории сообщений в Tkinter
 '''
 conn_string = "host='localhost' dbname='postgres' user='postgres' password='4309344'"
 conn = psycopg2.connect(conn_string)
@@ -30,26 +34,92 @@ cur.execute("""
         """)
 conn.commit()
 
+usr1 = User('Alice', '1111111')
+usr2 = User('Ted', '2222222')
+usr3 = User('Bob', '3333333')
+usr4 = User('Fred', '4444444')
+usr5 = User('Ed', '555555')
+usr6 = User('Bob', '6666666')
 
-Alice = User('Alice', '1111111')
-Bob = User('Bob', '2222222')
-Ted = User('Ted', '3333333')
-Fred = User('Fred', '4444444')
-Med = User('Med', '555555')
-Alice.addContact(Bob)
-Alice.addContact(Ted)
-Alice.addContact(Fred)
-Alice.getContacts()
-Bob.addContact(Ted)
-Bob.addContact(Med)
-Bob.getContacts()
-Alice.startChat(Bob, Ted, Fred)
-Bob.startChat(Ted, Med)
+usr1.addContact(usr2)
+usr1.addContact(usr3)
+usr1.addContact(usr4)
+usr1.addContact(usr5)
+
+current_chat = 0
+
+current_user = usr1
+
+root = Tk()
+root.title("Messenger" + ' --- ' + str(current_user.name))
+root.minsize(500,500)
+root.resizable(width=True, height=True)
+f1 = Frame(root)
+f2 = Frame(root)
+
+f1.pack(side='left')
+f2.pack(side='right')
+
+contacts_list = Text(f1, bg="white", font="Arial 12", width=20, height=25)
+contacts_list.pack(side='bottom')
+chat_log = Text(f2, bg="white", font="Arial 12", width=50, height=20)
+chat_log.pack(side='top')
 
 
 
-'''CREATE TABLE IF NOT EXISTS messenger.chat (chatid integer PRIMARY KEY DEFAULT nextval('serial'), owner integer) WHERE table_constraint is: FOREIGN KEY owner REFERENCES user (userid) ON DELETE DELETE ON UPDATE UPDATE);
-        CREATE TABLE IF NOT EXISTS messenger.message (messageid integer PRIMARY KEY DEFAULT nextval('serial'), sender integer, time timestamp without timezone, text text, chatid integer) WHERE table_constraint is: FOREIGN KEY sender REFERENCES user (userid) ON DELETE DELETE ON UPDATE UPDATE chatid REFERENCES chat (chatid) ON DELETE DELETE ON UPDATE UPDATE);
-        CREATE TABLE IF NOT EXISTS messenger.chat_participants (chatid integer PRIMARY KEY DEFAULT nextval('serial'), participant integer) WHERE table_constraint is: FOREIGN KEY participant REFERENCES user (userid) ON DELETE DELETE ON UPDATE UPDATE);
-        CREATE TABLE IF NOT EXISTS messenger.contacts (userid integer PRIMARY KEY DEFAULT nextval('serial'), contact integer) WHERE table_constraint is: FOREIGN KEY contact REFERENCES user (userid) ON DELETE DELETE ON UPDATE UPDATE);
-        '''
+def start_chat():
+    global current_chat
+    contacts_list.delete('0.0', END)
+    rows = current_user.getContacts()
+    for row in rows:
+        contacts_list.insert('1.0',row[0] + "\n")
+
+    current_chat = current_user.startChat(usr2, usr3, usr4, usr5, usr6)
+
+
+def send_message(event, message_input):
+    new_message = message_input.get('0.0', END)
+    for chat in Chat.chats:
+        if chat.id == current_chat:
+            chat.addMessage(current_user, new_message)
+        message_input.delete('0.0', END)
+    conn_string = "host='localhost' dbname='postgres' user='postgres' password='4309344'"
+    conn = psycopg2.connect(conn_string)
+    cur = conn.cursor()
+    cur.execute(
+        """select m.*, u.name from messenger.message m join messenger.user u on m.sender=u.userid where chatid=%s order by time desc;""",
+        (current_chat,))
+    messages = cur.fetchall()
+    conn.commit()
+    chat_log.delete('0.0', END)
+    for message in messages:
+        sender = message[1]
+        time = message[2]
+        text = message[3] + "\n"
+        name = message[-1]
+        concat_str = name + ' ' + str(time)[:-7] + "\n"
+        chat_log.insert('1.0', text)
+        chat_log.insert('1.0',concat_str)
+
+get_contacts = Button(f1, text='Создать чат', command=start_chat)
+get_contacts.pack(side='top')
+message_input = Text(f2, bg="white", font="Arial 12", width=50, height=5)
+message_input.pack(side='bottom')
+
+
+send_button = Button(f2, text='Отправить сообщение')
+send_button.pack(side='bottom')
+send_button.bind("<Button-1>", lambda event: send_message(event, message_input))
+
+
+
+root.mainloop()
+
+
+
+
+'''
+time = mes.time
+    chat_log.insert('1.0', current_user.name + str(time)[:-7], '\n')
+    chat_log.insert('1.0', new_message, '\n'
+'''
