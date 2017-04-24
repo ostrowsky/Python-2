@@ -2,6 +2,7 @@ import hashlib
 from Message import Mess
 from Chat import Chat
 import psycopg2
+from datetime import datetime
 
 
 
@@ -10,30 +11,32 @@ class User:
     status_list = ('offline', 'online')
     user_statuses = {}
     def __init__(self, name, password):
-        if User.users_list:
-            self.id = User.users_list[-1].id + 1
-        else:
-            self.id = 111111
         User.users_list.append(self)
         self.name = name
-        self.password = password
-        self.status = User.status_list[0]
-        User.user_statuses[self.id] = User.status_list[0]
+        self.password = str(hashlib.md5(password.encode('utf-8')))
+        self.status = 'offline'
         self.contacts = []
+        self.created_at = datetime.now()
         conn_string = "host='localhost' dbname='postgres' user='postgres' password='4309344'"
         conn = psycopg2.connect(conn_string)
         cur = conn.cursor()
         cur.execute("""
                         insert into messenger.user
-                        (userid, name, password, status)
+                        (name, password, status, createdat)
                         values (%s, %s, %s, %s);""",
-                    (self.id, self.name, self.password, self.status))
+                    (self.name, self.password, self.status, self.created_at))
+
+        cur.execute("""
+                                select userid from messenger.user
+                                where name=%s and password=%s;""",
+                    (self.name, self.password))
+
+        self.id = cur.fetchone()[0]
         conn.commit()
 
 
 
-    def getId(self):
-        return self.id
+
 
 
     def getName(self):
@@ -54,7 +57,7 @@ class User:
             cur = conn.cursor()
             cur.execute("""
                                     insert into messenger.contacts
-                                    (userself, usercontact)
+                                    (userid, contact)
                                     values (%s, %s);""",
                         (self.id, contact.id))
             conn.commit()
